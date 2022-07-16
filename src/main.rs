@@ -12,6 +12,7 @@ use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
 use pixels::{Pixels, SurfaceTexture, Error};
 use winit::event::{WindowEvent, Event, VirtualKeyCode};
+use crate::interpreter::Interpreter;
 
 
 const WIDTH: u32 = 64;
@@ -40,20 +41,20 @@ fn main() -> Result<(), Error> {
         Pixels::new(WIDTH, HEIGHT, surface_texture)?
     };
 
-    // TODO: set up interpreter here
-    let op_codes = read_op_codes().unwrap();
+    let args: Vec<String> = env::args().collect();
+    let filename = &args[1];
 
-    let disassembler = Disassembler {};
+    let buffer = fs::read(filename).unwrap();
 
-    for op_code in op_codes.iter() {
-        disassembler.handle_op(op_code);
-    }
+    let interpreter = Interpreter::new(buffer);
+
+    interpreter.disassemble_program();
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
 
         if let Event::RedrawRequested(_) = event {
-            draw(pixels.get_frame());
+            draw(pixels.get_frame(), &interpreter.memory);
             if pixels
                 .render()
                 .map_err(|e| panic!("pixels.render() failed: {}", e))
@@ -84,32 +85,21 @@ fn main() -> Result<(), Error> {
     });
 }
 
-fn read_op_codes() -> io::Result<Vec<OpCode>> {
-    let args: Vec<String> = env::args().collect();
-    let filename = &args[1];
-
-    let buffer = fs::read(filename)?;
-
-    let res = buffer
-        .iter()
-        .enumerate()
-        .step_by(2)
-        .map(|(i, byte)| { OpCode { first: *byte, second: buffer[i+1] } })
-        .collect();
-
-    Ok(res)
-}
-
-fn draw(frame: &mut [u8]) {
-    // TODO this needs to use screen state from Interpreter
+fn draw(frame: &mut [u8], memory: &[u8; 4096]) {
     for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-        let color =
-            if i == 0 {
-                WHITE
-            } else {
-                BLACK
-            };
+        let color = match get_bit_at(memory[0xf00 + i / 8], (i % 8) as u8) {
+            true => WHITE,
+            false => BLACK
+        };
 
         pixel.copy_from_slice(&color);
+    }
+}
+
+fn get_bit_at(input: u8, n: u8) -> bool {
+    if n < 8 {
+        input & (1 << n) != 0
+    } else {
+        false
     }
 }

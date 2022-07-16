@@ -2,6 +2,7 @@ mod disassembler;
 mod opcode;
 mod interpreter;
 mod constants;
+mod util;
 
 use std::{env, io, fs};
 use crate::opcode::OpCode;
@@ -14,6 +15,7 @@ use pixels::{Pixels, SurfaceTexture, Error};
 use winit::event::{WindowEvent, Event, VirtualKeyCode};
 use crate::interpreter::Interpreter;
 use crate::constants::DISPLAY_MEM_START;
+use crate::util::get_bit_at;
 
 
 const WIDTH: u32 = 64;
@@ -49,11 +51,9 @@ fn main() -> Result<(), Error> {
 
     let mut interpreter = Interpreter::new(buffer);
 
-    interpreter.disassemble_program();
+    // interpreter.disassemble_program();
 
     event_loop.run(move |event, _, control_flow| {
-        *control_flow = ControlFlow::Wait;
-
         if let Event::RedrawRequested(_) = event {
             draw(pixels.get_frame(), &interpreter.memory);
             if pixels
@@ -65,7 +65,6 @@ fn main() -> Result<(), Error> {
                 return;
             }
         }
-
 
         // Handle input events
         if input.update(&event) {
@@ -79,10 +78,11 @@ fn main() -> Result<(), Error> {
             if let Some(size) = input.window_resized() {
                 pixels.resize_surface(size.width, size.height);
             }
-
-            // Request a redraw
-            window.request_redraw();
         }
+
+        interpreter.tick();
+        // Request a redraw
+        window.request_redraw();
     });
 }
 
@@ -97,10 +97,3 @@ fn draw(frame: &mut [u8], memory: &[u8; 4096]) {
     }
 }
 
-fn get_bit_at(input: u8, n: u8) -> bool {
-    if n < 8 {
-        input & (1 << n) != 0
-    } else {
-        false
-    }
-}

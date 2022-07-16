@@ -52,7 +52,7 @@ impl Interpreter {
             0x4 => self.disassembler.handle_op(op_code),
             0x5 => self.disassembler.handle_op(op_code),
             0x6 => self.handle_6_op(op_code),
-            0x7 => self.disassembler.handle_op(op_code),
+            0x7 => self.handle_7_op(op_code),
             0x8 => self.disassembler.handle_op(op_code),
             0x9 => self.disassembler.handle_op(op_code),
             0xa => self.handle_a_op(op_code),
@@ -120,6 +120,12 @@ impl Interpreter {
         self.pc += 2;
     }
 
+    fn handle_7_op(&mut self, op_code: &OpCode) {
+        let register = (op_code.first & 0xF) as usize;
+        self.v[register] += op_code.second;
+        self.pc += 2;
+    }
+
     fn handle_a_op(&mut self, op_code: &OpCode) {
         self.i = op_code.to_u16() & 0xfff;
         self.pc += 2;
@@ -135,7 +141,7 @@ impl Interpreter {
         for j in 0..n {
             let pos = x as u16 + 64 * (y as u16 + j as u16);
 
-            let sprite_line = self.memory[(self.i + j as u16) as usize];
+            let sprite_line = self.memory[(self.i + j as u16) as usize].reverse_bits();
 
             // display mem location pointers
             let mut mem_loc = DISPLAY_MEM_START + (pos / 8) as usize;

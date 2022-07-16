@@ -51,7 +51,7 @@ fn main() -> Result<(), Error> {
 
     let mut interpreter = Interpreter::new(buffer);
 
-    // interpreter.disassemble_program();
+    interpreter.disassemble_program();
 
     event_loop.run(move |event, _, control_flow| {
         if let Event::RedrawRequested(_) = event {

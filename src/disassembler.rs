@@ -1,8 +1,32 @@
-use crate::types::{OpCode, HandleOp};
+use crate::opcode::OpCode;
 
 pub struct Disassembler {}
 
 impl Disassembler {
+    pub fn handle_op(&self, op_code: &OpCode) {
+        let nibble = op_code.first >> 4 & 0xF;
+        let translated = match nibble {
+            0x0 => self.handle_0_op(op_code),
+            0x1 => self.handle_1_op(op_code),
+            0x2 => self.handle_2_op(op_code),
+            0x3 => self.handle_3_op(op_code),
+            0x4 => self.handle_4_op(op_code),
+            0x5 => self.handle_5_op(op_code),
+            0x6 => self.handle_6_op(op_code),
+            0x7 => self.handle_7_op(op_code),
+            0x8 => self.handle_8_op(op_code),
+            0x9 => self.handle_9_op(op_code),
+            0xa => self.handle_a_op(op_code),
+            0xb => self.handle_b_op(op_code),
+            0xc => self.handle_c_op(op_code),
+            0xd => self.handle_d_op(op_code),
+            0xe => self.handle_e_op(op_code),
+            0xf => self.handle_f_op(op_code),
+            _ => panic!("impossible!"),
+        };
+        println!("{:02x}{:02x} | {}", op_code.first, op_code.second, translated);
+    }
+
     fn handle_0_op(&self, op_code: &OpCode) -> String {
         match op_code.first & 0xF {
             0 => match op_code.second {
@@ -98,32 +122,6 @@ impl Disassembler {
             0x65 => format!("LD v{:1x} [I]", op_code.first & 0xF),
             _ => "Unknown f".to_string(),
         }
-    }
-}
-
-impl HandleOp for Disassembler {
-    fn handle_op(&self, op_code: &OpCode) {
-        let nibble = op_code.first >> 4 & 0xF;
-        let translated = match nibble {
-            0x0 => self.handle_0_op(op_code),
-            0x1 => self.handle_1_op(op_code),
-            0x2 => self.handle_2_op(op_code),
-            0x3 => self.handle_3_op(op_code),
-            0x4 => self.handle_4_op(op_code),
-            0x5 => self.handle_5_op(op_code),
-            0x6 => self.handle_6_op(op_code),
-            0x7 => self.handle_7_op(op_code),
-            0x8 => self.handle_8_op(op_code),
-            0x9 => self.handle_9_op(op_code),
-            0xa => self.handle_a_op(op_code),
-            0xb => self.handle_b_op(op_code),
-            0xc => self.handle_c_op(op_code),
-            0xd => self.handle_d_op(op_code),
-            0xe => self.handle_e_op(op_code),
-            0xf => self.handle_f_op(op_code),
-            _ => panic!("impossible!"),
-        };
-        println!("{:02x}{:02x} | {}", op_code.first, op_code.second, translated);
     }
 }
 

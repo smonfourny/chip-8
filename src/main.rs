@@ -1,11 +1,11 @@
 mod disassembler;
-mod types;
+mod opcode;
 mod interpreter;
+mod constants;
 
 use std::{env, io, fs};
-use crate::types::OpCode;
+use crate::opcode::OpCode;
 use crate::disassembler::Disassembler;
-use crate::types::HandleOp;
 use winit_input_helper::WinitInputHelper;
 use winit::dpi::LogicalSize;
 use winit::event_loop::{ControlFlow, EventLoop};
@@ -13,6 +13,7 @@ use winit::window::WindowBuilder;
 use pixels::{Pixels, SurfaceTexture, Error};
 use winit::event::{WindowEvent, Event, VirtualKeyCode};
 use crate::interpreter::Interpreter;
+use crate::constants::DISPLAY_MEM_START;
 
 
 const WIDTH: u32 = 64;
@@ -46,7 +47,7 @@ fn main() -> Result<(), Error> {
 
     let buffer = fs::read(filename).unwrap();
 
-    let interpreter = Interpreter::new(buffer);
+    let mut interpreter = Interpreter::new(buffer);
 
     interpreter.disassemble_program();
 
@@ -87,7 +88,7 @@ fn main() -> Result<(), Error> {
 
 fn draw(frame: &mut [u8], memory: &[u8; 4096]) {
     for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-        let color = match get_bit_at(memory[0xf00 + i / 8], (i % 8) as u8) {
+        let color = match get_bit_at(memory[DISPLAY_MEM_START + i / 8], (i % 8) as u8) {
             true => WHITE,
             false => BLACK
         };

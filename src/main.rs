@@ -57,7 +57,7 @@ fn main() -> Result<(), Error> {
             draw(pixels.get_frame(), &interpreter.memory);
             if pixels
                 .render()
-                .map_err(|e| panic!("pixels.render() failed: {}", e))
+                .map_err(|e| panic!("pixels.render() failed: {:?}", e))
                 .is_err()
             {
                 *control_flow = ControlFlow::Exit;

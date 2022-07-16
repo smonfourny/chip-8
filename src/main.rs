@@ -1,9 +1,11 @@
-mod dissassembler;
+mod disassembler;
 mod types;
+mod interpreter;
 
 use std::{env, io, fs};
 use crate::types::OpCode;
-use crate::dissassembler::handle_op;
+use crate::disassembler::Disassembler;
+use crate::types::HandleOp;
 
 fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -18,8 +20,10 @@ fn main() -> io::Result<()> {
         .map(|(i, byte)| { OpCode { first: *byte, second: buffer[i+1] } })
         .collect();
 
+    let disassembler = Disassembler {};
+
     for op_code in op_codes.iter() {
-        handle_op(op_code);
+        disassembler.handle_op(op_code);
     }
 
     Ok(())

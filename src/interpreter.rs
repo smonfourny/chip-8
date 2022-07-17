@@ -2,8 +2,8 @@ use crate::constants::{DISPLAY_MEM_START, FONT, FONT_START, PC_DEFAULT_START, ST
 use crate::disassembler::Disassembler;
 use crate::opcode::OpCode;
 use crate::util::get_bit_at;
-use std::io;
 use rand::random;
+use std::io;
 
 pub struct Interpreter {
     v: [u8; 16],            // general purpose registers
@@ -117,7 +117,7 @@ impl Interpreter {
                     let right = self.memory[(self.sp - 1) as usize];
                     self.sp -= 2;
                     self.pc = (left as u16) << 8 | right as u16;
-                },
+                }
                 _ => panic!("Unknown op code"),
             },
             _ => panic!("Not implemented!"),
@@ -254,7 +254,7 @@ impl Interpreter {
             0x1e => {
                 let register = (op_code.first & 0xF) as usize;
                 self.i = u16::wrapping_add(self.i, self.v[register] as u16);
-            },
+            }
             0x29 => println!("LD F v{:1x}", op_code.first & 0xF),
             0x33 => println!("LD B v{:1x}", op_code.first & 0xF),
             0x55 => println!("LD [I] v{:1x}", op_code.first & 0xF),

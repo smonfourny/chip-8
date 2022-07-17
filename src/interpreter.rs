@@ -132,8 +132,7 @@ impl Interpreter {
     }
 
     fn handle_d_op(&mut self, op_code: &OpCode) {
-        // TODO implement vf behaviour
-        let flipped = 0;
+        let mut flipped = false;
         let n = op_code.second & 0xF;
         let x = self.v[(op_code.first & 0xF) as usize];
         let y = self.v[(op_code.second >> 4 & 0xF) as usize];
@@ -149,7 +148,11 @@ impl Interpreter {
 
             // For each bit of sprite
             for k in 0..8 {
-                let bit = if get_bit_at(sprite_line, k) { 1 } else { 0 };
+                let bit_in_sprite = get_bit_at(sprite_line, k);
+                let no_bit_in_display = !get_bit_at(self.memory[mem_loc], bit_loc as u8);
+                flipped = flipped || (bit_in_sprite && no_bit_in_display);
+
+                let bit = if bit_in_sprite { 1 } else { 0 };
 
                 self.memory[mem_loc] = self.memory[mem_loc] | (bit << bit_loc);
 
@@ -161,7 +164,7 @@ impl Interpreter {
             }
         }
 
-        self.v[0xF] = flipped;
+        self.v[0xF] = if flipped { 1 } else { 0 };
         self.pc += 2;
     }
 }

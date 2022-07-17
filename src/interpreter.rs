@@ -3,6 +3,7 @@ use crate::disassembler::Disassembler;
 use crate::opcode::OpCode;
 use crate::util::get_bit_at;
 use std::io;
+use rand::random;
 
 pub struct Interpreter {
     v: [u8; 16],            // general purpose registers
@@ -59,7 +60,7 @@ impl Interpreter {
             0x9 => self.handle_9_op(op_code),
             0xa => self.handle_a_op(op_code),
             0xb => self.handle_b_op(op_code),
-            0xc => self.disassembler.handle_op(op_code),
+            0xc => self.handle_c_op(op_code),
             0xd => self.handle_d_op(op_code),
             0xe => self.disassembler.handle_op(op_code),
             0xf => self.disassembler.handle_op(op_code),
@@ -198,6 +199,13 @@ impl Interpreter {
     fn handle_b_op(&mut self, op_code: &OpCode) {
         let n = op_code.to_u16() & 0xFFF;
         self.pc += self.v[0] as u16 + n;
+    }
+
+    fn handle_c_op(&mut self, op_code: &OpCode) {
+        let register = (op_code.first & 0xF) as usize;
+        let r: u8 = random();
+
+        self.v[register] = r & op_code.second;
     }
 
     fn handle_d_op(&mut self, op_code: &OpCode) {

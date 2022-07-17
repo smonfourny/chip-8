@@ -5,14 +5,12 @@ mod opcode;
 mod util;
 
 use crate::constants::DISPLAY_MEM_START;
-use crate::disassembler::Disassembler;
 use crate::interpreter::Interpreter;
-use crate::opcode::OpCode;
 use crate::util::get_bit_at;
 use pixels::{Error, Pixels, SurfaceTexture};
-use std::{env, fs, io};
+use std::{env, fs};
 use winit::dpi::LogicalSize;
-use winit::event::{Event, VirtualKeyCode, WindowEvent};
+use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
 use winit_input_helper::WinitInputHelper;

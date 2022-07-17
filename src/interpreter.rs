@@ -46,7 +46,7 @@ impl Interpreter {
         let nibble = op_code.first >> 4 & 0xF;
         match nibble {
             0x0 => self.handle_0_op(op_code),
-            0x1 => self.disassembler.handle_op(op_code),
+            0x1 => self.handle_1_op(op_code),
             0x2 => self.disassembler.handle_op(op_code),
             0x3 => self.disassembler.handle_op(op_code),
             0x4 => self.disassembler.handle_op(op_code),
@@ -112,6 +112,10 @@ impl Interpreter {
             _ => panic!("Not implemented!"),
         }
         self.pc += 2;
+    }
+
+    fn handle_1_op(&mut self, op_code: &OpCode) {
+        self.pc = op_code.to_u16() & 0xfff;
     }
 
     fn handle_6_op(&mut self, op_code: &OpCode) {

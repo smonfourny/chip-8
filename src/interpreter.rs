@@ -233,6 +233,7 @@ impl Interpreter {
             },
             _ => println!("unknown op code"),
         };
+        self.pc += 2;
     }
 
     fn handle_9_op(&mut self, op_code: &OpCode) {
@@ -259,6 +260,7 @@ impl Interpreter {
         let r: u8 = random();
 
         self.v[register] = r & op_code.second;
+        self.pc += 2;
     }
 
     fn handle_d_op(&mut self, op_code: &OpCode) {
@@ -307,6 +309,7 @@ impl Interpreter {
             0x1e => {
                 let register = (op_code.first & 0xF) as usize;
                 self.i = u16::wrapping_add(self.i, self.v[register] as u16);
+                self.pc += 2;
             }
             0x29 => println!("LD F v{:1x}", op_code.first & 0xF),
             0x33 => println!("LD B v{:1x}", op_code.first & 0xF),

@@ -1,4 +1,4 @@
-use crate::constants::{DISPLAY_MEM_START, FONT, FONT_START, PC_DEFAULT_START};
+use crate::constants::{DISPLAY_MEM_START, FONT, FONT_START, PC_DEFAULT_START, STACK_START};
 use crate::disassembler::Disassembler;
 use crate::opcode::OpCode;
 use crate::util::get_bit_at;
@@ -28,7 +28,7 @@ impl Interpreter {
             i: 0,
             dt: 0,
             st: 0,
-            sp: 0,
+            sp: STACK_START as u8,
             pc: PC_DEFAULT_START as u16,
             memory,
             program_length: program.len(),
@@ -49,7 +49,7 @@ impl Interpreter {
         match nibble {
             0x0 => self.handle_0_op(op_code),
             0x1 => self.handle_1_op(op_code),
-            0x2 => self.disassembler.handle_op(op_code),
+            0x2 => self.handle_2_op(op_code),
             0x3 => self.handle_3_op(op_code),
             0x4 => self.handle_4_op(op_code),
             0x5 => self.handle_5_op(op_code),
@@ -111,7 +111,12 @@ impl Interpreter {
         match op_code.first & 0xF {
             0 => match op_code.second {
                 0xe0 => self.clear_screen(),
-                0xee => panic!("Not implemented!"),
+                0xee => {
+                    let left = self.memory[(self.sp - 2) as usize];
+                    let right = self.memory[(self.sp - 1) as usize];
+                    self.sp -= 2;
+                    self.pc = (left as u16) << 8 | right as u16;
+                },
                 _ => panic!("Unknown op code"),
             },
             _ => panic!("Not implemented!"),
@@ -121,6 +126,20 @@ impl Interpreter {
 
     fn handle_1_op(&mut self, op_code: &OpCode) {
         self.pc = op_code.to_u16() & 0xfff;
+    }
+
+    fn handle_2_op(&mut self, op_code: &OpCode) {
+        let n = op_code.to_u16() & 0xfff;
+
+        let next_pc = self.pc + 2;
+        let next_pc_l = next_pc >> 8 & 0xFFFF;
+        let next_pc_r = next_pc & 0x00FF;
+
+        self.memory[self.sp as usize] = next_pc_l as u8;
+        self.memory[(self.sp + 1) as usize] = next_pc_r as u8;
+        self.sp += 2;
+
+        self.pc = n;
     }
 
     fn handle_3_op(&mut self, op_code: &OpCode) {

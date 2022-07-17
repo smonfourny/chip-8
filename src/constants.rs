@@ -17,6 +17,8 @@ pub const FONT: [u8; 80] = [
     0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 ];
 
+pub const STACK_START: usize = 0xea0;
+
 pub const DISPLAY_MEM_START: usize = 0xf00;
 
 pub const FONT_START: usize = 0x050;

@@ -51,7 +51,7 @@ impl Interpreter {
             0x1 => self.handle_1_op(op_code),
             0x2 => self.disassembler.handle_op(op_code),
             0x3 => self.handle_3_op(op_code),
-            0x4 => self.disassembler.handle_op(op_code),
+            0x4 => self.handle_4_op(op_code),
             0x5 => self.disassembler.handle_op(op_code),
             0x6 => self.handle_6_op(op_code),
             0x7 => self.handle_7_op(op_code),
@@ -127,6 +127,15 @@ impl Interpreter {
         let register = (op_code.first & 0xF) as usize;
         let n = op_code.second;
         if self.v[register] == n {
+            self.pc += 2;
+        }
+        self.pc += 2;
+    }
+
+    fn handle_4_op(&mut self, op_code: &OpCode) {
+        let register = (op_code.first & 0xF) as usize;
+        let n = op_code.second;
+        if self.v[register] != n {
             self.pc += 2;
         }
         self.pc += 2;

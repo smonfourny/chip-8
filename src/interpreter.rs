@@ -58,7 +58,7 @@ impl Interpreter {
             0x8 => self.disassembler.handle_op(op_code),
             0x9 => self.handle_9_op(op_code),
             0xa => self.handle_a_op(op_code),
-            0xb => self.disassembler.handle_op(op_code),
+            0xb => self.handle_b_op(op_code),
             0xc => self.disassembler.handle_op(op_code),
             0xd => self.handle_d_op(op_code),
             0xe => self.disassembler.handle_op(op_code),
@@ -174,6 +174,11 @@ impl Interpreter {
     fn handle_a_op(&mut self, op_code: &OpCode) {
         self.i = op_code.to_u16() & 0xfff;
         self.pc += 2;
+    }
+
+    fn handle_b_op(&mut self, op_code: &OpCode) {
+        let n = op_code.to_u16() & 0xFFF;
+        self.pc += self.v[0] as u16 + n;
     }
 
     fn handle_d_op(&mut self, op_code: &OpCode) {

@@ -1,7 +1,6 @@
 mod constants;
 mod disassembler;
 mod interpreter;
-mod opcode;
 mod util;
 
 use crate::constants::DISPLAY_MEM_START;

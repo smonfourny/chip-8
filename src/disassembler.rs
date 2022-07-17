@@ -1,4 +1,4 @@
-use crate::opcode::OpCode;
+use crate::util::OpCode;
 
 pub struct Disassembler {}
 

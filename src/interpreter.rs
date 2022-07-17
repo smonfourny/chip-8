@@ -1,6 +1,6 @@
 use crate::constants::{DISPLAY_MEM_START, FONT, FONT_START, PC_DEFAULT_START, STACK_START};
 use crate::disassembler::Disassembler;
-use crate::opcode::OpCode;
+use crate::util::OpCode;
 use crate::util::get_bit_at;
 use rand::random;
 use std::io;

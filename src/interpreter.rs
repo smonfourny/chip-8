@@ -56,7 +56,7 @@ impl Interpreter {
             0x6 => self.handle_6_op(op_code),
             0x7 => self.handle_7_op(op_code),
             0x8 => self.disassembler.handle_op(op_code),
-            0x9 => self.disassembler.handle_op(op_code),
+            0x9 => self.handle_9_op(op_code),
             0xa => self.handle_a_op(op_code),
             0xb => self.disassembler.handle_op(op_code),
             0xc => self.disassembler.handle_op(op_code),
@@ -159,6 +159,15 @@ impl Interpreter {
     fn handle_7_op(&mut self, op_code: &OpCode) {
         let register = (op_code.first & 0xF) as usize;
         self.v[register] = u8::wrapping_add(self.v[register], op_code.second);
+        self.pc += 2;
+    }
+
+    fn handle_9_op(&mut self, op_code: &OpCode) {
+        let register_1 = (op_code.first & 0xF) as usize;
+        let register_2 = (op_code.second >> 4 & 0xF) as usize;
+        if self.v[register_1] != self.v[register_2] {
+            self.pc += 2;
+        }
         self.pc += 2;
     }
 

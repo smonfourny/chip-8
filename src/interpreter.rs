@@ -63,7 +63,7 @@ impl Interpreter {
             0xc => self.handle_c_op(op_code),
             0xd => self.handle_d_op(op_code),
             0xe => self.disassembler.handle_op(op_code),
-            0xf => self.disassembler.handle_op(op_code),
+            0xf => self.handle_f_op(op_code),
             _ => panic!("impossible!"),
         }
     }
@@ -243,5 +243,23 @@ impl Interpreter {
 
         self.v[0xF] = if flipped { 1 } else { 0 };
         self.pc += 2;
+    }
+
+    fn handle_f_op(&mut self, op_code: &OpCode) {
+        match op_code.second {
+            0x07 => println!("LD v{:1x} DT", op_code.first & 0xF),
+            0x0a => println!("LD v{:1x} K", op_code.first & 0xF),
+            0x15 => println!("LD DT v{:1x}", op_code.first & 0xF),
+            0x18 => println!("LD ST v{:1x}", op_code.first & 0xF),
+            0x1e => {
+                let register = (op_code.first & 0xF) as usize;
+                self.i = u16::wrapping_add(self.i, self.v[register] as u16);
+            },
+            0x29 => println!("LD F v{:1x}", op_code.first & 0xF),
+            0x33 => println!("LD B v{:1x}", op_code.first & 0xF),
+            0x55 => println!("LD [I] v{:1x}", op_code.first & 0xF),
+            0x65 => println!("LD v{:1x} [I]", op_code.first & 0xF),
+            _ => panic!("Unknown op code"),
+        };
     }
 }

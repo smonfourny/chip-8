@@ -1,17 +1,16 @@
-use crate::opcode::OpCode;
+use crate::constants::{DISPLAY_MEM_START, FONT, FONT_START, PC_DEFAULT_START};
 use crate::disassembler::Disassembler;
-use std::io;
-use crate::constants::{PC_DEFAULT_START, FONT, FONT_START, DISPLAY_MEM_START};
+use crate::opcode::OpCode;
 use crate::util::get_bit_at;
-
+use std::io;
 
 pub struct Interpreter {
-    v: [u8; 16], // general purpose registers
-    i: u16, // I register, 12-bit wide
-    dt: u8, // timer register
-    st: u8, // sound time register
-    sp: u8, // stack pointer
-    pc: u16, // program counter
+    v: [u8; 16],            // general purpose registers
+    i: u16,                 // I register, 12-bit wide
+    dt: u8,                 // timer register
+    st: u8,                 // sound time register
+    sp: u8,                 // stack pointer
+    pc: u16,                // program counter
     pub memory: [u8; 4096], // RAM
     program_length: usize,
     disassembler: Disassembler,
@@ -33,12 +32,15 @@ impl Interpreter {
             pc: PC_DEFAULT_START as u16,
             memory,
             program_length: program.len(),
-            disassembler: Disassembler {}
+            disassembler: Disassembler {},
         }
     }
 
     pub fn tick(&mut self) {
-        let op_code = OpCode { first: self.memory[self.pc as usize], second: self.memory[(self.pc+1) as usize] };
+        let op_code = OpCode {
+            first: self.memory[self.pc as usize],
+            second: self.memory[(self.pc + 1) as usize],
+        };
         self.handle_op(&op_code);
     }
 
@@ -70,7 +72,10 @@ impl Interpreter {
             .iter()
             .enumerate()
             .step_by(2)
-            .map(|(i, byte)| { OpCode { first: *byte, second: self.memory[PC_DEFAULT_START+i+1] } })
+            .map(|(i, byte)| OpCode {
+                first: *byte,
+                second: self.memory[PC_DEFAULT_START + i + 1],
+            })
             .collect();
 
         Ok(res)

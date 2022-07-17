@@ -24,7 +24,10 @@ impl Disassembler {
             0xf => self.handle_f_op(op_code),
             _ => panic!("impossible!"),
         };
-        println!("{:02x}{:02x} | {}", op_code.first, op_code.second, translated);
+        println!(
+            "{:02x}{:02x} | {}",
+            op_code.first, op_code.second, translated
+        );
     }
 
     fn handle_0_op(&self, op_code: &OpCode) -> String {
@@ -34,8 +37,9 @@ impl Disassembler {
                 0xee => "RET".to_string(),
                 _ => "Unknown 0".to_string(),
             },
-            _ => format!("SYS {:1x}{:2x}", op_code.first & 0xF, op_code.second)
-        }.to_owned()
+            _ => format!("SYS {:1x}{:2x}", op_code.first & 0xF, op_code.second),
+        }
+        .to_owned()
     }
 
     fn handle_1_op(&self, op_code: &OpCode) -> String {
@@ -55,7 +59,11 @@ impl Disassembler {
     }
 
     fn handle_5_op(&self, op_code: &OpCode) -> String {
-        format!("SE v{:1x} v{:1x}", op_code.first & 0xF, op_code.second >> 4 & 0xF)
+        format!(
+            "SE v{:1x} v{:1x}",
+            op_code.first & 0xF,
+            op_code.second >> 4 & 0xF
+        )
     }
 
     fn handle_6_op(&self, op_code: &OpCode) -> String {
@@ -68,21 +76,61 @@ impl Disassembler {
 
     fn handle_8_op(&self, op_code: &OpCode) -> String {
         match op_code.second & 0xF {
-            0x0 => format!("LD v{:1x} v{:1x}", op_code.first & 0xF, op_code.second >> 4 & 0xF),
-            0x1 => format!("OR v{:1x} v{:1x}", op_code.first & 0xF, op_code.second >> 4 & 0xF),
-            0x2 => format!("AND v{:1x} v{:1x}", op_code.first & 0xF, op_code.second >> 4 & 0xF),
-            0x3 => format!("XOR v{:1x} v{:1x}", op_code.first & 0xF, op_code.second >> 4 & 0xF),
-            0x4 => format!("ADD v{:1x} v{:1x}", op_code.first & 0xF, op_code.second >> 4 & 0xF),
-            0x5 => format!("SUB v{:1x} v{:1x}", op_code.first & 0xF, op_code.second >> 4 & 0xF),
-            0x6 => format!("SHR v{:1x} v{:1x}", op_code.first & 0xF, op_code.second >> 4 & 0xF),
-            0x7 => format!("SUBN v{:1x} v{:1x}", op_code.first & 0xF, op_code.second >> 4 & 0xF),
-            0xe => format!("SHL v{:1x} v{:1x}", op_code.first & 0xF, op_code.second >> 4 & 0xF),
+            0x0 => format!(
+                "LD v{:1x} v{:1x}",
+                op_code.first & 0xF,
+                op_code.second >> 4 & 0xF
+            ),
+            0x1 => format!(
+                "OR v{:1x} v{:1x}",
+                op_code.first & 0xF,
+                op_code.second >> 4 & 0xF
+            ),
+            0x2 => format!(
+                "AND v{:1x} v{:1x}",
+                op_code.first & 0xF,
+                op_code.second >> 4 & 0xF
+            ),
+            0x3 => format!(
+                "XOR v{:1x} v{:1x}",
+                op_code.first & 0xF,
+                op_code.second >> 4 & 0xF
+            ),
+            0x4 => format!(
+                "ADD v{:1x} v{:1x}",
+                op_code.first & 0xF,
+                op_code.second >> 4 & 0xF
+            ),
+            0x5 => format!(
+                "SUB v{:1x} v{:1x}",
+                op_code.first & 0xF,
+                op_code.second >> 4 & 0xF
+            ),
+            0x6 => format!(
+                "SHR v{:1x} v{:1x}",
+                op_code.first & 0xF,
+                op_code.second >> 4 & 0xF
+            ),
+            0x7 => format!(
+                "SUBN v{:1x} v{:1x}",
+                op_code.first & 0xF,
+                op_code.second >> 4 & 0xF
+            ),
+            0xe => format!(
+                "SHL v{:1x} v{:1x}",
+                op_code.first & 0xF,
+                op_code.second >> 4 & 0xF
+            ),
             _ => format!("unknown 8"),
         }
     }
 
     fn handle_9_op(&self, op_code: &OpCode) -> String {
-        format!("SNE v{:1x} v{:1x}", op_code.first & 0xF, op_code.second >> 4 & 0xF)
+        format!(
+            "SNE v{:1x} v{:1x}",
+            op_code.first & 0xF,
+            op_code.second >> 4 & 0xF
+        )
     }
 
     fn handle_a_op(&self, op_code: &OpCode) -> String {
@@ -98,7 +146,12 @@ impl Disassembler {
     }
 
     fn handle_d_op(&self, op_code: &OpCode) -> String {
-        format!("DRW v{:1x} v{:1x} {}", op_code.first & 0xF, op_code.second >> 4 & 0xF, op_code.second & 0xF)
+        format!(
+            "DRW v{:1x} v{:1x} {}",
+            op_code.first & 0xF,
+            op_code.second >> 4 & 0xF,
+            op_code.second & 0xF
+        )
     }
 
     fn handle_e_op(&self, op_code: &OpCode) -> String {
@@ -124,4 +177,3 @@ impl Disassembler {
         }
     }
 }
-

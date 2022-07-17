@@ -1,22 +1,21 @@
-mod disassembler;
-mod opcode;
-mod interpreter;
 mod constants;
+mod disassembler;
+mod interpreter;
+mod opcode;
 mod util;
 
-use std::{env, io, fs};
-use crate::opcode::OpCode;
+use crate::constants::DISPLAY_MEM_START;
 use crate::disassembler::Disassembler;
-use winit_input_helper::WinitInputHelper;
+use crate::interpreter::Interpreter;
+use crate::opcode::OpCode;
+use crate::util::get_bit_at;
+use pixels::{Error, Pixels, SurfaceTexture};
+use std::{env, fs, io};
 use winit::dpi::LogicalSize;
+use winit::event::{Event, VirtualKeyCode, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
-use pixels::{Pixels, SurfaceTexture, Error};
-use winit::event::{WindowEvent, Event, VirtualKeyCode};
-use crate::interpreter::Interpreter;
-use crate::constants::DISPLAY_MEM_START;
-use crate::util::get_bit_at;
-
+use winit_input_helper::WinitInputHelper;
 
 const WIDTH: u32 = 64;
 const HEIGHT: u32 = 32;
@@ -90,10 +89,9 @@ fn draw(frame: &mut [u8], memory: &[u8; 4096]) {
     for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
         let color = match get_bit_at(memory[DISPLAY_MEM_START + i / 8], (i % 8) as u8) {
             true => WHITE,
-            false => BLACK
+            false => BLACK,
         };
 
         pixel.copy_from_slice(&color);
     }
 }
-

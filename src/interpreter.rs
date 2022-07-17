@@ -56,7 +56,7 @@ impl Interpreter {
             0x5 => self.handle_5_op(op_code),
             0x6 => self.handle_6_op(op_code),
             0x7 => self.handle_7_op(op_code),
-            0x8 => self.disassembler.handle_op(op_code),
+            0x8 => self.handle_8_op(op_code),
             0x9 => self.handle_9_op(op_code),
             0xa => self.handle_a_op(op_code),
             0xb => self.handle_b_op(op_code),
@@ -180,6 +180,59 @@ impl Interpreter {
         let register = (op_code.first & 0xF) as usize;
         self.v[register] = u8::wrapping_add(self.v[register], op_code.second);
         self.pc += 2;
+    }
+
+    fn handle_8_op(&mut self, op_code: &OpCode) {
+        match op_code.second & 0xF {
+            0x0 => {
+                let register_1 = (op_code.first & 0xF) as usize;
+                let register_2 = (op_code.second >> 4 & 0xF) as usize;
+                self.v[register_1] = self.v[register_2];
+            },
+            0x1 => {
+                let register_1 = (op_code.first & 0xF) as usize;
+                let register_2 = (op_code.second >> 4 & 0xF) as usize;
+                self.v[register_1] |= self.v[register_2];
+            },
+            0x2 => {
+                let register_1 = (op_code.first & 0xF) as usize;
+                let register_2 = (op_code.second >> 4 & 0xF) as usize;
+                self.v[register_1] &= self.v[register_2];
+            },
+            0x3 => {
+                let register_1 = (op_code.first & 0xF) as usize;
+                let register_2 = (op_code.second >> 4 & 0xF) as usize;
+                self.v[register_1] ^= self.v[register_2];
+            },
+            0x4 => {
+                let register_1 = (op_code.first & 0xF) as usize;
+                let register_2 = (op_code.second >> 4 & 0xF) as usize;
+                self.v[register_1] = u8::wrapping_add(self.v[register_1], self.v[register_2]);
+            },
+            0x5 => {
+                let register_1 = (op_code.first & 0xF) as usize;
+                let register_2 = (op_code.second >> 4 & 0xF) as usize;
+                self.v[register_1] = u8::wrapping_sub(self.v[register_1], self.v[register_2]);
+            },
+            0x6 => {
+                let register = (op_code.first & 0xF) as usize;
+                let least_significant = get_bit_at(self.v[register], 0);
+                self.v[register] >>= 1;
+                self.v[0xF] = if least_significant { 1 } else { 0 };
+            },
+            0x7 => {
+                let register_1 = (op_code.first & 0xF) as usize;
+                let register_2 = (op_code.second >> 4 & 0xF) as usize;
+                self.v[register_1] = u8::wrapping_sub(self.v[register_2], self.v[register_1]);
+            },
+            0xe => {
+                let register = (op_code.first & 0xF) as usize;
+                let most_significant = get_bit_at(self.v[register], 7);
+                self.v[register] <<= 1;
+                self.v[0xF] = if most_significant { 1 } else { 0 };
+            },
+            _ => println!("unknown op code"),
+        };
     }
 
     fn handle_9_op(&mut self, op_code: &OpCode) {

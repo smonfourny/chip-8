@@ -111,7 +111,10 @@ impl Interpreter {
     fn handle_0_op(&mut self, op_code: &OpCode) {
         match op_code.first & 0xF {
             0 => match op_code.second {
-                0xe0 => self.clear_screen(),
+                0xe0 => {
+                    self.clear_screen();
+                    self.pc += 2;
+                },
                 0xee => {
                     let left = self.memory[(self.sp - 2) as usize];
                     let right = self.memory[(self.sp - 1) as usize];
@@ -122,7 +125,6 @@ impl Interpreter {
             },
             _ => panic!("Not implemented!"),
         }
-        self.pc += 2;
     }
 
     fn handle_1_op(&mut self, op_code: &OpCode) {

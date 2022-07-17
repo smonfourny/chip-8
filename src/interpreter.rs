@@ -90,7 +90,7 @@ impl Interpreter {
         }
     }
 
-    fn initialize_program(memory: &mut [u8; 4096], program: &Vec<u8>) {
+    fn initialize_program(memory: &mut [u8; 4096], program: &[u8]) {
         for (i, byte) in program.iter().enumerate() {
             memory[0x200 + i] = *byte;
         }
@@ -133,7 +133,7 @@ impl Interpreter {
         let n = op_code.to_u16() & 0xfff;
 
         let next_pc = self.pc + 2;
-        let next_pc_l = next_pc >> 8 & 0xFFFF;
+        let next_pc_l = next_pc >> 8;
         let next_pc_r = next_pc & 0x00FF;
 
         self.memory[self.sp as usize] = next_pc_l as u8;
@@ -231,7 +231,7 @@ impl Interpreter {
 
                 let bit = if bit_in_sprite { 1 } else { 0 };
 
-                self.memory[mem_loc] = self.memory[mem_loc] | (bit << bit_loc);
+                self.memory[mem_loc] |= bit << bit_loc;
 
                 bit_loc += 1;
                 if bit_loc >= 8 {

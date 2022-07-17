@@ -39,7 +39,6 @@ impl Disassembler {
             },
             _ => format!("SYS {:1x}{:2x}", op_code.first & 0xF, op_code.second),
         }
-        .to_owned()
     }
 
     fn handle_1_op(&self, op_code: &OpCode) -> String {
@@ -121,7 +120,7 @@ impl Disassembler {
                 op_code.first & 0xF,
                 op_code.second >> 4 & 0xF
             ),
-            _ => format!("unknown 8"),
+            _ => "unknown 8".to_string(),
         }
     }
 

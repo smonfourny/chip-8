@@ -76,9 +76,11 @@ fn main() -> Result<(), Error> {
             }
         }
 
-        interpreter.tick();
-        // Request a redraw
-        window.request_redraw();
+        let result = interpreter.tick();
+        if result.refresh_display {
+            // Request a redraw
+            window.request_redraw();
+        }
     });
 }
 

@@ -13,6 +13,7 @@ pub struct Interpreter {
     sp: u8,                 // stack pointer
     pc: u16,                // program counter
     pub memory: [u8; 4096], // RAM
+    keyboard: [bool; 16],
     program_length: usize,
     disassembler: Disassembler,
 }
@@ -33,6 +34,7 @@ impl Interpreter {
             pc: PC_DEFAULT_START as u16,
             memory,
             program_length: program.len(),
+            keyboard: [false; 16],
             disassembler: Disassembler {},
         }
     }
@@ -43,6 +45,10 @@ impl Interpreter {
             second: self.memory[(self.pc + 1) as usize],
         };
         self.handle_op(&op_code)
+    }
+
+    pub fn press_key(&mut self, key: usize, pressed: bool) {
+        self.keyboard[key] = pressed;
     }
 
     fn handle_op(&mut self, op_code: &OpCode) -> InterpreterResult {

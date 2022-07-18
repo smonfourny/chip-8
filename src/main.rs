@@ -9,10 +9,11 @@ use crate::util::get_bit_at;
 use pixels::{Error, Pixels, SurfaceTexture};
 use std::{env, fs};
 use winit::dpi::LogicalSize;
-use winit::event::{Event, VirtualKeyCode};
+use winit::event::{Event, VirtualKeyCode, StartCause};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
 use winit_input_helper::WinitInputHelper;
+use std::time::{Instant, Duration};
 
 const WIDTH: u32 = 64;
 const HEIGHT: u32 = 32;
@@ -47,20 +48,37 @@ fn main() -> Result<(), Error> {
 
     let mut interpreter = Interpreter::new(buffer);
 
+    let timer_length = Duration::new(0, 16);
+
     interpreter.disassemble_program();
 
     event_loop.run(move |event, _, control_flow| {
-        if let Event::RedrawRequested(_) = event {
-            draw(pixels.get_frame(), &interpreter.memory);
-            if pixels
-                .render()
-                .map_err(|e| panic!("pixels.render() failed: {:?}", e))
-                .is_err()
-            {
-                *control_flow = ControlFlow::Exit;
-                return;
+        match event {
+            Event::RedrawRequested(_) => {
+                draw(pixels.get_frame(), &interpreter.memory);
+                if pixels
+                    .render()
+                    .map_err(|e| panic!("pixels.render() failed: {:?}", e))
+                    .is_err()
+                {
+                    *control_flow = ControlFlow::Exit;
+                    return;
+                }
+            },
+            Event::NewEvents(StartCause::Init) => {
+                *control_flow = ControlFlow::WaitUntil(Instant::now() + timer_length);
             }
-        }
+            Event::NewEvents(StartCause::ResumeTimeReached { .. }) => {
+                let result = interpreter.tick();
+                if result.refresh_display {
+                    // Request a redraw
+                    window.request_redraw();
+                }
+
+                *control_flow = ControlFlow::WaitUntil(Instant::now() + timer_length);
+            }
+            _ => (),
+        };
 
         // Handle input events
         if input.update(&event) {
@@ -74,12 +92,6 @@ fn main() -> Result<(), Error> {
             if let Some(size) = input.window_resized() {
                 pixels.resize_surface(size.width, size.height);
             }
-        }
-
-        let result = interpreter.tick();
-        if result.refresh_display {
-            // Request a redraw
-            window.request_redraw();
         }
     });
 }

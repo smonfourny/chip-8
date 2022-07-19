@@ -366,6 +366,7 @@ impl Interpreter {
                 bit_loc += 1;
                 if bit_loc >= 8 {
                     mem_loc += 1;
+                    mem_loc %= 4096;
                     bit_loc = 0;
                 }
             }

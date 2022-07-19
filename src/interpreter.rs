@@ -49,7 +49,7 @@ impl Interpreter {
         }
         if self.st > 0 {
             println!("I have no mouth and I must beep");
-            self.dt -= 1
+            self.st -= 1
         }
         self.handle_op(&op_code)
     }
@@ -122,9 +122,11 @@ impl Interpreter {
     }
 
     fn handle_0_op(&mut self, op_code: &OpCode) -> InterpreterResult {
+        println!("HENLO");
         match op_code.first & 0xF {
             0 => match op_code.second {
                 0xe0 => {
+                    println!("pls clear");
                     self.clear_screen();
                     self.pc += 2;
                     InterpreterResult { refresh_display: true, wait_for_keyboard: None }
@@ -304,7 +306,7 @@ impl Interpreter {
             let sprite_line = self.memory[(self.i + j as u16) as usize].reverse_bits();
 
             // display mem location pointers
-            let mut mem_loc = DISPLAY_MEM_START + (pos / 8) as usize;
+            let mut mem_loc = (DISPLAY_MEM_START + (pos / 8) as usize) % 4095;
             let mut bit_loc = pos % 8;
 
             // For each bit of sprite

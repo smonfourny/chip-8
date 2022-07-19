@@ -78,6 +78,7 @@ fn main() -> Result<(), Error> {
                 }
                 *control_flow = match result.wait_for_keyboard {
                     Some(register) => {
+                        println!("Waiting!!");
                         register_to_store = register;
                         waiting_for_key = true;
                         ControlFlow::Wait
@@ -94,7 +95,7 @@ fn main() -> Result<(), Error> {
                             input:
                             KeyboardInput {
                                 virtual_keycode: Some(virtual_code),
-                                state: ElementState::Released,
+                                state: ElementState::Pressed,
                                 ..
                             },
                             ..
@@ -111,6 +112,7 @@ fn main() -> Result<(), Error> {
                             VirtualKeyCode::Z | VirtualKeyCode::X |
                             VirtualKeyCode::C | VirtualKeyCode::V => {
                                 if waiting_for_key {
+                                    println!("key!");
                                     interpreter.press_key(register_to_store, key_to_chip_8(virtual_code), );
                                     if *control_flow == ControlFlow::Wait {
                                         *control_flow = ControlFlow::WaitUntil(Instant::now() + timer_length);

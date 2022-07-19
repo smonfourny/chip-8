@@ -63,7 +63,6 @@ fn main() -> Result<(), Error> {
                     .is_err()
                 {
                     *control_flow = ControlFlow::Exit;
-                    return;
                 }
             }
             Event::NewEvents(StartCause::Init) => {
@@ -118,11 +117,7 @@ fn main() -> Result<(), Error> {
                     | VirtualKeyCode::X
                     | VirtualKeyCode::C
                     | VirtualKeyCode::V => {
-                        let pressed = if state == ElementState::Pressed {
-                            true
-                        } else {
-                            false
-                        };
+                        let pressed = state == ElementState::Pressed;
                         interpreter.press_key(key_to_chip_8(virtual_code), pressed);
                         if waiting_for_key && state == ElementState::Released {
                             interpreter.store_key(register_to_store, key_to_chip_8(virtual_code));

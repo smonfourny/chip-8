@@ -350,7 +350,7 @@ impl Interpreter {
             let sprite_line = self.memory[(self.i + j as u16) as usize].reverse_bits();
 
             // display mem location pointers
-            let mut mem_loc = (DISPLAY_MEM_START + (pos / 8) as usize) % 4095;
+            let mut mem_loc = (DISPLAY_MEM_START + (pos / 8) as usize) % 4096;
             let mut bit_loc = pos % 8;
 
             // For each bit of sprite

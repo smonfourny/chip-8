@@ -7,12 +7,12 @@ use crate::constants::DISPLAY_MEM_START;
 use crate::interpreter::Interpreter;
 use crate::util::{get_bit_at, key_to_chip_8};
 use pixels::{Error, Pixels, SurfaceTexture};
+use std::time::{Duration, Instant};
 use std::{env, fs};
 use winit::dpi::LogicalSize;
-use winit::event::{Event, VirtualKeyCode, StartCause, WindowEvent, KeyboardInput, ElementState};
+use winit::event::{ElementState, Event, KeyboardInput, StartCause, VirtualKeyCode, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
-use std::time::{Instant, Duration};
 
 const WIDTH: u32 = 64;
 const HEIGHT: u32 = 32;
@@ -65,7 +65,7 @@ fn main() -> Result<(), Error> {
                     *control_flow = ControlFlow::Exit;
                     return;
                 }
-            },
+            }
             Event::NewEvents(StartCause::Init) => {
                 *control_flow = ControlFlow::WaitUntil(Instant::now() + timer_length);
             }
@@ -82,48 +82,55 @@ fn main() -> Result<(), Error> {
                         register_to_store = register;
                         waiting_for_key = true;
                         ControlFlow::Wait
-                    },
-                    None => ControlFlow::WaitUntil(Instant::now() + timer_length)
-                };
-            },
-            Event::WindowEvent { event, .. } => {
-                    match event {
-                        WindowEvent::CloseRequested => {
-                            *control_flow = ControlFlow::Exit;
-                        },
-                        WindowEvent::KeyboardInput {
-                            input:
-                            KeyboardInput {
-                                virtual_keycode: Some(virtual_code),
-                                state: ElementState::Pressed,
-                                ..
-                            },
-                            ..
-                        } => match virtual_code {
-                            VirtualKeyCode::Escape => {
-                                *control_flow = ControlFlow::Exit;
-                            },
-                            VirtualKeyCode::Key1 | VirtualKeyCode::Key2 |
-                            VirtualKeyCode::Key3 | VirtualKeyCode::Key4 |
-                            VirtualKeyCode::Q | VirtualKeyCode::W |
-                            VirtualKeyCode::E | VirtualKeyCode::R |
-                            VirtualKeyCode::A | VirtualKeyCode::S |
-                            VirtualKeyCode::D | VirtualKeyCode::F |
-                            VirtualKeyCode::Z | VirtualKeyCode::X |
-                            VirtualKeyCode::C | VirtualKeyCode::V => {
-                                if waiting_for_key {
-                                    println!("key!");
-                                    interpreter.press_key(register_to_store, key_to_chip_8(virtual_code), );
-                                    if *control_flow == ControlFlow::Wait {
-                                        *control_flow = ControlFlow::WaitUntil(Instant::now() + timer_length);
-                                    }
-                                    waiting_for_key = false;
-                                }
-                            },
-                            _ => (),
-                        },
-                        _ => (),
                     }
+                    None => ControlFlow::WaitUntil(Instant::now() + timer_length),
+                };
+            }
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::CloseRequested => {
+                    *control_flow = ControlFlow::Exit;
+                }
+                WindowEvent::KeyboardInput {
+                    input:
+                        KeyboardInput {
+                            virtual_keycode: Some(virtual_code),
+                            state,
+                            ..
+                        },
+                    ..
+                } => match virtual_code {
+                    VirtualKeyCode::Escape => {
+                        *control_flow = ControlFlow::Exit;
+                    }
+                    VirtualKeyCode::Key1
+                    | VirtualKeyCode::Key2
+                    | VirtualKeyCode::Key3
+                    | VirtualKeyCode::Key4
+                    | VirtualKeyCode::Q
+                    | VirtualKeyCode::W
+                    | VirtualKeyCode::E
+                    | VirtualKeyCode::R
+                    | VirtualKeyCode::A
+                    | VirtualKeyCode::S
+                    | VirtualKeyCode::D
+                    | VirtualKeyCode::F
+                    | VirtualKeyCode::Z
+                    | VirtualKeyCode::X
+                    | VirtualKeyCode::C
+                    | VirtualKeyCode::V => {
+                        if waiting_for_key {
+                            println!("key!");
+                            interpreter.press_key(register_to_store, key_to_chip_8(virtual_code));
+                            if *control_flow == ControlFlow::Wait {
+                                *control_flow =
+                                    ControlFlow::WaitUntil(Instant::now() + timer_length);
+                            }
+                            waiting_for_key = false;
+                        }
+                    }
+                    _ => (),
+                },
+                _ => (),
             },
             _ => (),
         };

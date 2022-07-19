@@ -1,7 +1,7 @@
 use crate::constants::{DISPLAY_MEM_START, FONT, FONT_START, PC_DEFAULT_START, STACK_START};
 use crate::disassembler::Disassembler;
-use crate::util::{OpCode, InterpreterResult};
 use crate::util::get_bit_at;
+use crate::util::{InterpreterResult, OpCode};
 use rand::random;
 use std::io;
 
@@ -48,6 +48,7 @@ impl Interpreter {
             self.dt -= 1
         }
         if self.st > 0 {
+            // TODO beep somehow
             self.st -= 1
         }
         self.handle_op(&op_code)
@@ -127,14 +128,20 @@ impl Interpreter {
                     println!("pls clear");
                     self.clear_screen();
                     self.pc += 2;
-                    InterpreterResult { refresh_display: true, wait_for_keyboard: None }
-                },
+                    InterpreterResult {
+                        refresh_display: true,
+                        wait_for_keyboard: None,
+                    }
+                }
                 0xee => {
                     let left = self.memory[(self.sp - 2) as usize];
                     let right = self.memory[(self.sp - 1) as usize];
                     self.sp -= 2;
                     self.pc = (left as u16) << 8 | right as u16;
-                    InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+                    InterpreterResult {
+                        refresh_display: false,
+                        wait_for_keyboard: None,
+                    }
                 }
                 _ => panic!("Unknown op code"),
             },
@@ -144,7 +151,10 @@ impl Interpreter {
 
     fn handle_1_op(&mut self, op_code: &OpCode) -> InterpreterResult {
         self.pc = op_code.to_u16() & 0xfff;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_2_op(&mut self, op_code: &OpCode) -> InterpreterResult {
@@ -159,7 +169,10 @@ impl Interpreter {
         self.sp += 2;
 
         self.pc = n;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_3_op(&mut self, op_code: &OpCode) -> InterpreterResult {
@@ -169,7 +182,10 @@ impl Interpreter {
             self.pc += 2;
         }
         self.pc += 2;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_4_op(&mut self, op_code: &OpCode) -> InterpreterResult {
@@ -179,7 +195,10 @@ impl Interpreter {
             self.pc += 2;
         }
         self.pc += 2;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_5_op(&mut self, op_code: &OpCode) -> InterpreterResult {
@@ -189,21 +208,30 @@ impl Interpreter {
             self.pc += 2;
         }
         self.pc += 2;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_6_op(&mut self, op_code: &OpCode) -> InterpreterResult {
         let register = (op_code.first & 0xF) as usize;
         self.v[register] = op_code.second;
         self.pc += 2;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_7_op(&mut self, op_code: &OpCode) -> InterpreterResult {
         let register = (op_code.first & 0xF) as usize;
         self.v[register] = u8::wrapping_add(self.v[register], op_code.second);
         self.pc += 2;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_8_op(&mut self, op_code: &OpCode) -> InterpreterResult {
@@ -212,53 +240,56 @@ impl Interpreter {
                 let register_1 = (op_code.first & 0xF) as usize;
                 let register_2 = (op_code.second >> 4 & 0xF) as usize;
                 self.v[register_1] = self.v[register_2];
-            },
+            }
             0x1 => {
                 let register_1 = (op_code.first & 0xF) as usize;
                 let register_2 = (op_code.second >> 4 & 0xF) as usize;
                 self.v[register_1] |= self.v[register_2];
-            },
+            }
             0x2 => {
                 let register_1 = (op_code.first & 0xF) as usize;
                 let register_2 = (op_code.second >> 4 & 0xF) as usize;
                 self.v[register_1] &= self.v[register_2];
-            },
+            }
             0x3 => {
                 let register_1 = (op_code.first & 0xF) as usize;
                 let register_2 = (op_code.second >> 4 & 0xF) as usize;
                 self.v[register_1] ^= self.v[register_2];
-            },
+            }
             0x4 => {
                 let register_1 = (op_code.first & 0xF) as usize;
                 let register_2 = (op_code.second >> 4 & 0xF) as usize;
                 self.v[register_1] = u8::wrapping_add(self.v[register_1], self.v[register_2]);
-            },
+            }
             0x5 => {
                 let register_1 = (op_code.first & 0xF) as usize;
                 let register_2 = (op_code.second >> 4 & 0xF) as usize;
                 self.v[register_1] = u8::wrapping_sub(self.v[register_1], self.v[register_2]);
-            },
+            }
             0x6 => {
                 let register = (op_code.first & 0xF) as usize;
                 let least_significant = get_bit_at(self.v[register], 0);
                 self.v[register] >>= 1;
                 self.v[0xF] = if least_significant { 1 } else { 0 };
-            },
+            }
             0x7 => {
                 let register_1 = (op_code.first & 0xF) as usize;
                 let register_2 = (op_code.second >> 4 & 0xF) as usize;
                 self.v[register_1] = u8::wrapping_sub(self.v[register_2], self.v[register_1]);
-            },
+            }
             0xe => {
                 let register = (op_code.first & 0xF) as usize;
                 let most_significant = get_bit_at(self.v[register], 7);
                 self.v[register] <<= 1;
                 self.v[0xF] = if most_significant { 1 } else { 0 };
-            },
+            }
             _ => println!("unknown op code"),
         };
         self.pc += 2;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_9_op(&mut self, op_code: &OpCode) -> InterpreterResult {
@@ -268,19 +299,28 @@ impl Interpreter {
             self.pc += 2;
         }
         self.pc += 2;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_a_op(&mut self, op_code: &OpCode) -> InterpreterResult {
         self.i = op_code.to_u16() & 0xfff;
         self.pc += 2;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_b_op(&mut self, op_code: &OpCode) -> InterpreterResult {
         let n = op_code.to_u16() & 0xFFF;
         self.pc += self.v[0] as u16 + n;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_c_op(&mut self, op_code: &OpCode) -> InterpreterResult {
@@ -289,7 +329,10 @@ impl Interpreter {
 
         self.v[register] = r & op_code.second;
         self.pc += 2;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_d_op(&mut self, op_code: &OpCode) -> InterpreterResult {
@@ -327,7 +370,10 @@ impl Interpreter {
 
         self.v[0xF] = if flipped { 1 } else { 0 };
         self.pc += 2;
-        InterpreterResult { refresh_display: true, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: true,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_e_op(&mut self, op_code: &OpCode) -> InterpreterResult {
@@ -343,7 +389,10 @@ impl Interpreter {
             self.pc += 2;
         }
         self.pc += 2;
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 
     fn handle_f_op(&mut self, op_code: &OpCode) -> InterpreterResult {
@@ -352,19 +401,19 @@ impl Interpreter {
             0x07 => {
                 self.v[register] = self.dt;
                 self.pc += 2;
-            },
+            }
             0x0a => {
                 self.v[register] = self.dt;
                 self.pc += 2;
-            },
+            }
             0x15 => {
                 self.dt = self.v[register];
                 self.pc += 2;
-            },
+            }
             0x18 => {
                 self.st = self.v[register];
                 self.pc += 2;
-            },
+            }
             0x1e => {
                 let register = (op_code.first & 0xF) as usize;
                 self.i = u16::wrapping_add(self.i, self.v[register] as u16);
@@ -374,7 +423,7 @@ impl Interpreter {
                 let char_i = self.v[register] as u16;
                 self.i = FONT_START as u16 + (char_i * 5);
                 self.pc += 2;
-            },
+            }
             0x33 => {
                 let mut value = self.v[register];
                 self.memory[self.i as usize + 2] = value % 10;
@@ -383,21 +432,24 @@ impl Interpreter {
                 value /= 10;
                 self.memory[self.i as usize] = value % 10;
                 self.pc += 2;
-            },
+            }
             0x55 => {
                 for i in 0..=register {
                     self.memory[self.i as usize + i] = self.v[i];
                 }
                 self.pc += 2;
-            },
+            }
             0x65 => {
                 for i in 0..=register {
                     self.v[i] = self.memory[self.i as usize + i];
                 }
                 self.pc += 2;
-            },
+            }
             _ => panic!("Unknown op code"),
         };
-        InterpreterResult { refresh_display: false, wait_for_keyboard: None }
+        InterpreterResult {
+            refresh_display: false,
+            wait_for_keyboard: None,
+        }
     }
 }

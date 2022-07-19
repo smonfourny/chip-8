@@ -34,7 +34,7 @@ pub fn key_to_chip_8(key: VirtualKeyCode) -> u8 {
         VirtualKeyCode::X => 13,
         VirtualKeyCode::C => 14,
         VirtualKeyCode::V => 15,
-        _ => panic!("Unknown key!")
+        _ => panic!("Unknown key!"),
     }
 }
 

@@ -129,7 +129,6 @@ impl Interpreter {
         match op_code.first & 0xF {
             0 => match op_code.second {
                 0xe0 => {
-                    println!("pls clear");
                     self.clear_screen();
                     self.pc += 2;
                     InterpreterResult {

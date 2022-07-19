@@ -44,6 +44,13 @@ impl Interpreter {
             first: self.memory[self.pc as usize],
             second: self.memory[(self.pc + 1) as usize],
         };
+        if self.dt > 0 {
+            self.dt -= 1
+        }
+        if self.st > 0 {
+            println!("I have no mouth and I must beep");
+            self.dt -= 1
+        }
         self.handle_op(&op_code)
     }
 

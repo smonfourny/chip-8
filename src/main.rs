@@ -25,7 +25,6 @@ const BLACK: [u8; 4] = [0x88, 0xaa, 0x88, 0xff];
 fn main() -> Result<(), Error> {
     env_logger::init();
     let event_loop = EventLoop::new();
-    let mut input = WinitInputHelper::new();
     let window = {
         let size = LogicalSize::new((WIDTH * 12) as f64, (HEIGHT * 12) as f64);
         WindowBuilder::new()

@@ -75,7 +75,7 @@ impl Interpreter {
             0xb => self.handle_b_op(op_code),
             0xc => self.handle_c_op(op_code),
             0xd => self.handle_d_op(op_code),
-            0xe => { self.disassembler.handle_op(op_code); InterpreterResult { refresh_display: false, wait_for_keyboard: false } } ,
+            0xe => self.handle_e_op(op_code),
             0xf => self.handle_f_op(op_code),
             _ => panic!("impossible!"),
         }
@@ -328,6 +328,22 @@ impl Interpreter {
         self.v[0xF] = if flipped { 1 } else { 0 };
         self.pc += 2;
         InterpreterResult { refresh_display: true, wait_for_keyboard: false }
+    }
+
+    fn handle_e_op(&mut self, op_code: &OpCode) -> InterpreterResult {
+        let register = (op_code.first & 0xF) as usize;
+
+        let skip = match op_code.second {
+            0x9e => self.keyboard[self.v[register] as usize],
+            0xa1 => self.keyboard[self.v[register] as usize],
+            _ => false,
+        };
+
+        if skip {
+            self.pc += 2;
+        }
+        self.pc += 2;
+        InterpreterResult { refresh_display: false, wait_for_keyboard: false }
     }
 
     fn handle_f_op(&mut self, op_code: &OpCode) -> InterpreterResult {

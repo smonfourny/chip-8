@@ -13,10 +13,10 @@ impl OpCode {
 
 pub struct InterpreterResult {
     pub refresh_display: bool,
-    pub wait_for_keyboard: bool,
+    pub wait_for_keyboard: Option<usize>,
 }
 
-pub fn key_to_chip_8(key: VirtualKeyCode) -> usize {
+pub fn key_to_chip_8(key: VirtualKeyCode) -> u8 {
     match key {
         VirtualKeyCode::Key1 => 0,
         VirtualKeyCode::Key2 => 1,

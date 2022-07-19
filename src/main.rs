@@ -12,9 +12,7 @@ use winit::dpi::LogicalSize;
 use winit::event::{Event, VirtualKeyCode, StartCause, WindowEvent, KeyboardInput, ElementState};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
-use winit_input_helper::WinitInputHelper;
 use std::time::{Instant, Duration};
-use winit::event::ElementState::Pressed;
 
 const WIDTH: u32 = 64;
 const HEIGHT: u32 = 32;
@@ -52,6 +50,9 @@ fn main() -> Result<(), Error> {
 
     interpreter.disassemble_program();
 
+    let mut register_to_store: usize = 0;
+    let mut waiting_for_key = false;
+
     event_loop.run(move |event, _, control_flow| {
         match event {
             Event::RedrawRequested(_) => {
@@ -75,41 +76,52 @@ fn main() -> Result<(), Error> {
                     // Request a redraw
                     window.request_redraw();
                 }
-                *control_flow = if result.wait_for_keyboard { ControlFlow::Wait } else { ControlFlow::WaitUntil(Instant::now() + timer_length) };
+                *control_flow = match result.wait_for_keyboard {
+                    Some(register) => {
+                        register_to_store = register;
+                        waiting_for_key = true;
+                        ControlFlow::Wait
+                    },
+                    None => ControlFlow::WaitUntil(Instant::now() + timer_length)
+                };
             },
-            Event::WindowEvent { event, .. } => match event {
-                WindowEvent::CloseRequested => {
-                    *control_flow = ControlFlow::Exit;
-                },
-                WindowEvent::KeyboardInput {
-                    input:
-                    KeyboardInput {
-                        virtual_keycode: Some(virtual_code),
-                        state,
-                        ..
-                    },
-                    ..
-                } => match virtual_code {
-                    VirtualKeyCode::Escape => {
-                        *control_flow = ControlFlow::Exit;
-                    },
-                    VirtualKeyCode::Key1 | VirtualKeyCode::Key2 |
-                    VirtualKeyCode::Key3 | VirtualKeyCode::Key4 |
-                    VirtualKeyCode::Q | VirtualKeyCode::W |
-                    VirtualKeyCode::E | VirtualKeyCode::R |
-                    VirtualKeyCode::A | VirtualKeyCode::S |
-                    VirtualKeyCode::D | VirtualKeyCode::F |
-                    VirtualKeyCode::Z | VirtualKeyCode::X |
-                    VirtualKeyCode::C | VirtualKeyCode::V => {
-                        let pressed = if state == Pressed { true } else { false };
-                        interpreter.press_key(key_to_chip_8(virtual_code), pressed);
-                        if *control_flow == ControlFlow::Wait {
-                            *control_flow = ControlFlow::WaitUntil(Instant::now() + timer_length);
-                        }
-                    },
-                    _ => (),
-                },
-                _ => (),
+            Event::WindowEvent { event, .. } => {
+                    match event {
+                        WindowEvent::CloseRequested => {
+                            *control_flow = ControlFlow::Exit;
+                        },
+                        WindowEvent::KeyboardInput {
+                            input:
+                            KeyboardInput {
+                                virtual_keycode: Some(virtual_code),
+                                state: ElementState::Released,
+                                ..
+                            },
+                            ..
+                        } => match virtual_code {
+                            VirtualKeyCode::Escape => {
+                                *control_flow = ControlFlow::Exit;
+                            },
+                            VirtualKeyCode::Key1 | VirtualKeyCode::Key2 |
+                            VirtualKeyCode::Key3 | VirtualKeyCode::Key4 |
+                            VirtualKeyCode::Q | VirtualKeyCode::W |
+                            VirtualKeyCode::E | VirtualKeyCode::R |
+                            VirtualKeyCode::A | VirtualKeyCode::S |
+                            VirtualKeyCode::D | VirtualKeyCode::F |
+                            VirtualKeyCode::Z | VirtualKeyCode::X |
+                            VirtualKeyCode::C | VirtualKeyCode::V => {
+                                if waiting_for_key {
+                                    interpreter.press_key(register_to_store, key_to_chip_8(virtual_code), );
+                                    if *control_flow == ControlFlow::Wait {
+                                        *control_flow = ControlFlow::WaitUntil(Instant::now() + timer_length);
+                                    }
+                                    waiting_for_key = false;
+                                }
+                            },
+                            _ => (),
+                        },
+                        _ => (),
+                    }
             },
             _ => (),
         };

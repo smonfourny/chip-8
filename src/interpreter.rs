@@ -54,7 +54,11 @@ impl Interpreter {
         self.handle_op(&op_code)
     }
 
-    pub fn press_key(&mut self, register: usize, key: u8) {
+    pub fn press_key(&mut self, key: u8, pressed: bool) {
+        self.keyboard[key as usize] = pressed;
+    }
+
+    pub fn store_key(&mut self, register: usize, key: u8) {
         self.v[register] = key;
     }
 
@@ -381,7 +385,7 @@ impl Interpreter {
 
         let skip = match op_code.second {
             0x9e => self.keyboard[self.v[register] as usize],
-            0xa1 => self.keyboard[self.v[register] as usize],
+            0xa1 => !self.keyboard[self.v[register] as usize],
             _ => false,
         };
 

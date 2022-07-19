@@ -48,7 +48,6 @@ impl Interpreter {
             self.dt -= 1
         }
         if self.st > 0 {
-            println!("I have no mouth and I must beep");
             self.st -= 1
         }
         self.handle_op(&op_code)
@@ -122,7 +121,6 @@ impl Interpreter {
     }
 
     fn handle_0_op(&mut self, op_code: &OpCode) -> InterpreterResult {
-        println!("HENLO");
         match op_code.first & 0xF {
             0 => match op_code.second {
                 0xe0 => {
@@ -312,12 +310,12 @@ impl Interpreter {
             // For each bit of sprite
             for k in 0..8 {
                 let bit_in_sprite = get_bit_at(sprite_line, k);
-                let no_bit_in_display = !get_bit_at(self.memory[mem_loc], bit_loc as u8);
-                flipped = flipped || (bit_in_sprite && no_bit_in_display);
+                let bit_in_display = get_bit_at(self.memory[mem_loc], bit_loc as u8);
+                flipped = flipped || (!bit_in_sprite && bit_in_display);
 
                 let bit = if bit_in_sprite { 1 } else { 0 };
 
-                self.memory[mem_loc] |= bit << bit_loc;
+                self.memory[mem_loc] ^= bit << bit_loc;
 
                 bit_loc += 1;
                 if bit_loc >= 8 {

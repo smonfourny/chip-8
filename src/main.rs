@@ -118,15 +118,18 @@ fn main() -> Result<(), Error> {
                     | VirtualKeyCode::X
                     | VirtualKeyCode::C
                     | VirtualKeyCode::V => {
-                        let pressed = if state == ElementState::Pressed { true } else { false };
+                        let pressed = if state == ElementState::Pressed {
+                            true
+                        } else {
+                            false
+                        };
                         interpreter.press_key(key_to_chip_8(virtual_code), pressed);
                         if waiting_for_key && state == ElementState::Released {
                             interpreter.store_key(register_to_store, key_to_chip_8(virtual_code));
                             waiting_for_key = false;
                         }
                         if *control_flow == ControlFlow::Wait {
-                            *control_flow =
-                                ControlFlow::WaitUntil(Instant::now() + timer_length);
+                            *control_flow = ControlFlow::WaitUntil(Instant::now() + timer_length);
                         }
                     }
                     _ => (),
